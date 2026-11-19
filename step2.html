@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Sales Dashboard - Step 2</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 40px auto; }
+    .kpis { display: flex; gap: 16px; margin-bottom: 30px; }
+    .kpi { background: #f0f0f0; padding: 16px; border-radius: 8px; flex: 1; }
+    .kpi h2 { margin: 0; }
+  </style>
+</head>
+<body>
+  <h1>Sales Dashboard</h1>
+  <div class="kpis" id="kpis"></div>
+  <canvas id="monthly"></canvas>
+
+  <script>
+    // 1. data.json ko load karo
+    fetch("data.json")
+      .then(res => res.json())
+      .then(data => {
+        // 2. KPI cards
+        const k = data.kpis;
+        document.getElementById("kpis").innerHTML = `
+          <div class="kpi"><p>Revenue</p><h2>$${k.total_revenue.toLocaleString()}</h2></div>
+          <div class="kpi"><p>Units</p><h2>${k.units_sold.toLocaleString()}</h2></div>
+          <div class="kpi"><p>Avg Price</p><h2>$${k.avg_price}</h2></div>
+          <div class="kpi"><p>Cities</p><h2>${k.cities}</h2></div>
+        `;
+
+        // 3. Monthly line chart
+        new Chart(document.getElementById("monthly"), {
+          type: "line",
+          data: {
+            labels: data.monthly_revenue.labels,
+            datasets: [{ label: "Monthly Revenue", data: data.monthly_revenue.values }]
+          }
+        });
+      });
+  </script>
+</body>
+</html>
