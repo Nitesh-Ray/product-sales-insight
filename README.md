@@ -1,53 +1,3 @@
-# Product Sales Insight
-
-A sales dashboard built with Next.js. It reads product sales data from a SQLite database (using Prisma) and shows charts for revenue, products, cities and trends.
-
-## Features
-- 5 tabs on one page: Overview, Revenue, Products, Cities, Trends
-- Filters: category, city, date range (month)
-- KPI cards with % change vs the previous 7 / 30 / 90 days
-- Monthly revenue with a 3-month rolling average
-- Month × Year revenue heatmap
-- Price vs quantity scatter plot with correlation
-
-## Tech stack
-Next.js 16, React 19, Tailwind CSS 4, Recharts, Prisma 6 + SQLite.
-Python (pandas) was used for the exploration notebook.
-
-## Data
-- `product_sales_dataset.csv`: 1000 orders (Jan 2025 – May 2026), 6 categories, 5 cities
-- `model.ipynb`: exploratory data analysis notebook
-
-## Run locally
-
-1. Clone and install
-
-```bash
-git clone https://github.com/Nitesh-Ray/product-sales-insight.git
-cd product-sales-insight
-npm install
-```
-
-2. Create a file named `.env` in the project root with this line:
-
-```
-DATABASE_URL="file:./dev.db"
-```
-
-3. Create the database and load the CSV into it
-
-```bash
-npx prisma db push
-npx tsx prisma/seed.ts
-```
-
-4. Start the app
-
-```bash
-npm run dev
-```
-
-Open http://localhost:3000
 
 
 
@@ -57,7 +7,7 @@ Open http://localhost:3000
 
 A sales analytics dashboard. Data is explored in a Python notebook, stored in a SQLite database with Prisma, and shown in a dark-themed Next.js dashboard deployed on Vercel.
 
-**Live demo:** https://YOUR-APP.vercel.app
+**Live demo:** https://product-sales-insight.vercel.app/
 
 ## Features
 - 5 views in one page: Overview, Revenue, Products, Cities, Trends
@@ -168,5 +118,6 @@ To browse the database visually: `npx prisma studio`
 ## Notes
 - The data ends on 16 May 2026, so May 2026 is an incomplete month.
 
-## Credits
-UI design inspired by the NexusPulse dashboard: https://github.com/PraneetGogoi/product-sales-insight
+
+## future updates
+Login, live database, Settings/About pages, ML prediction.
