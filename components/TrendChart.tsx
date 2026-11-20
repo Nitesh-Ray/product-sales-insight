@@ -1,6 +1,7 @@
 "use client";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { ResponsiveContainer, ComposedChart, Bar, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { rollingAverage } from "@/lib/analytics";
+import { GREEN, PURPLE, GRID, axisProps, tooltipProps, money, moneyShort } from "@/lib/theme";
 
 export default function TrendChart({ labels, values }: { labels: string[]; values: number[] }) {
   const avg = rollingAverage(values, 3);
@@ -8,14 +9,15 @@ export default function TrendChart({ labels, values }: { labels: string[]; value
   return (
     <div style={{ width: "100%", height: 320 }}>
       <ResponsiveContainer>
-        <LineChart data={data}>
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="revenue" stroke="#9ca3af" dot={false} />
-          <Line type="monotone" dataKey="rolling" name="3-month avg" stroke="#00aa00" strokeWidth={3} dot={false} />
-        </LineChart>
+        <ComposedChart data={data}>
+          <CartesianGrid stroke={GRID} vertical={false} />
+          <XAxis dataKey="name" {...axisProps} />
+          <YAxis tickFormatter={moneyShort} {...axisProps} />
+          <Tooltip {...tooltipProps} formatter={money} />
+          <Legend wrapperStyle={{ color: "#9ca3af" }} />
+          <Bar dataKey="revenue" name="Revenue" fill={GREEN} radius={[8, 8, 0, 0]} />
+          <Line type="monotone" dataKey="rolling" name="3-month avg" stroke={PURPLE} strokeWidth={3} strokeDasharray="5 5" dot={false} />
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );

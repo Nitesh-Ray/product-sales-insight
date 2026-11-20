@@ -1,21 +1,28 @@
 "use client";
 import { useMemo, useState, type ReactNode } from "react";
+import { LayoutDashboard, CircleDollarSign, Package, MapPin, TrendingUp } from "lucide-react";
 import Chart from "./Chart";
-// import { buildData, type Row } from "@/lib/analytics";
-
 import Heatmap from "./Heatmap";
 import PriceQtyScatter from "./PriceQtyScatter";
+import TrendChart from "./TrendChart";
 import { buildData, buildHeatmap, buildScatter, buildKpiChange, latestTime, type Row } from "@/lib/analytics";
 
-import TrendChart from "./TrendChart";
+const TABS = [
+  { name: "Overview", icon: LayoutDashboard },
+  { name: "Revenue", icon: CircleDollarSign },
+  { name: "Products", icon: Package },
+  { name: "Cities", icon: MapPin },
+  { name: "Trends", icon: TrendingUp },
+] as const;
+type Tab = (typeof TABS)[number]["name"];
 
-const TABS = ["Overview", "Revenue", "Products", "Cities", "Trends"] as const;
-type Tab = (typeof TABS)[number];
+const field =
+  "bg-[#252a34] border border-white/10 rounded-xl px-3 py-1.5 text-sm text-gray-200 [color-scheme:dark]";
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="bg-white rounded-lg shadow p-4 mb-6">
-      <h3 className="font-semibold mb-3">{title}</h3>
+    <div className="bg-[#252a34] rounded-3xl p-6 mb-6 shadow-lg shadow-black/30">
+      <h3 className="font-semibold mb-4">{title}</h3>
       {children}
     </div>
   );
@@ -24,12 +31,12 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
 function Kpi({ label, value, change, days }: { label: string; value: string; change: number | null; days: number }) {
   const up = change !== null && change >= 0;
   return (
-    <div className="bg-white p-4 rounded shadow">
-      <p>{label}</p>
-      <b className="text-xl">{value}</b>
-      <p className={`text-sm ${change === null ? "text-gray-400" : up ? "text-green-600" : "text-red-600"}`}>
+    <div className="bg-[#252a34] rounded-3xl p-5 shadow-lg shadow-black/30">
+      <p className="text-xs uppercase tracking-wider text-gray-400">{label}</p>
+      <b className="block text-2xl mt-2">{value}</b>
+      <p className={`text-sm mt-2 ${change === null ? "text-gray-500" : up ? "text-green-400" : "text-red-400"}`}>
         {change === null ? "–" : `${up ? "▲" : "▼"} ${Math.abs(change).toFixed(1)}%`}{" "}
-        <span className="text-gray-400">vs prev {days}d</span>
+        <span className="text-gray-500">vs prev {days}d</span>
       </p>
     </div>
   );
@@ -39,7 +46,7 @@ export default function Dashboard({ rows }: { rows: Row[] }) {
   const [tab, setTab] = useState<Tab>("Overview");
   const [category, setCategory] = useState("All");
   const [city, setCity] = useState("All");
-  const [from, setFrom] = useState(""); // "2025-03" jaisa
+  const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [days, setDays] = useState(30);
 
@@ -49,7 +56,7 @@ export default function Dashboard({ rows }: { rows: Row[] }) {
   const filtered = useMemo(
     () =>
       rows.filter((r) => {
-        const month = r.Order_Date.slice(0, 7); // "2025-01"
+        const month = r.Order_Date.slice(0, 7);
         return (
           (category === "All" || r.Category === category) &&
           (city === "All" || r.Customer_City === city) &&
@@ -68,48 +75,60 @@ export default function Dashboard({ rows }: { rows: Row[] }) {
   const scatter = useMemo(() => buildScatter(filtered), [filtered]);
 
   return (
-    <div className="flex min-h-screen bg-gray-100 text-gray-900">
-      {/* Menu */}
-      <nav className="w-52 bg-white shadow p-4">
-        <h1 className="text-xl font-bold mb-6">Sales Insight</h1>
-        {TABS.map((t) => (
+    <div className="min-h-screen bg-[#16181d] text-gray-200">
+      {/* Top bar */}
+      <header className="fixed top-0 inset-x-0 h-16 z-10 flex items-center px-6 bg-[#1b1e25] border-b border-white/5">
+        <span className="text-lg font-bold">
+          NexusPulse<span className="text-green-400">.</span>
+        </span>
+        <span className="ml-3 pl-3 border-l border-white/10 text-xs text-gray-500">{tab}</span>
+      </header>
+
+      {/* Sidebar (icons) */}
+      <nav className="fixed top-16 bottom-0 left-0 w-20 z-10 flex flex-col items-center gap-3 py-6 bg-[#1b1e25]">
+        {TABS.map(({ name, icon: Icon }) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`block w-full text-left px-3 py-2 rounded mb-1 ${tab === t ? "bg-green-600 text-white" : "hover:bg-gray-100"
-              }`}
+            key={name}
+            title={name}
+            onClick={() => setTab(name)}
+            className={`p-3 rounded-2xl transition ${
+              tab === name ? "bg-[#16181d] text-green-400 shadow-inner shadow-black/50" : "text-gray-500 hover:text-gray-200"
+            }`}
           >
-            {t}
+            <Icon size={22} />
           </button>
         ))}
       </nav>
 
       {/* Content */}
-      <main className="flex-1 p-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">{tab}</h2>
-          <div className="flex gap-3 items-center">
-            <select value={category} onChange={(e) => setCategory(e.target.value)} className="border rounded px-2 py-1 bg-white">
-              {categories.map((c) => <option key={c}>{c}</option>)}
-            </select>
-            <select value={city} onChange={(e) => setCity(e.target.value)} className="border rounded px-2 py-1 bg-white">
-              {cities.map((c) => <option key={c}>{c}</option>)}
-            </select>
-            <input type="month" value={from} onChange={(e) => setFrom(e.target.value)} className="border rounded px-2 py-1 bg-white" />
-            <input type="month" value={to} onChange={(e) => setTo(e.target.value)} className="border rounded px-2 py-1 bg-white" />
-            <select value={days} onChange={(e) => setDays(Number(e.target.value))} className="border rounded px-2 py-1 bg-white">
-              <option value={7}>7d</option>
-              <option value={30}>30d</option>
-              <option value={90}>90d</option>
-            </select>
-            <button onClick={() => { setCategory("All"); setCity("All"); setFrom(""); setTo(""); }} className="text-sm underline">              Reset
-            </button>
-          </div>
+      <main className="pt-24 pl-28 pr-8 pb-10">
+        <h2 className="text-2xl font-bold mb-4">{tab}</h2>
+
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className={field}>
+            {categories.map((c) => <option key={c}>{c}</option>)}
+          </select>
+          <select value={city} onChange={(e) => setCity(e.target.value)} className={field}>
+            {cities.map((c) => <option key={c}>{c}</option>)}
+          </select>
+          <input type="month" value={from} onChange={(e) => setFrom(e.target.value)} className={field} />
+          <input type="month" value={to} onChange={(e) => setTo(e.target.value)} className={field} />
+          <select value={days} onChange={(e) => setDays(Number(e.target.value))} className={field}>
+            <option value={7}>7d</option>
+            <option value={30}>30d</option>
+            <option value={90}>90d</option>
+          </select>
+          <button
+            onClick={() => { setCategory("All"); setCity("All"); setFrom(""); setTo(""); }}
+            className="text-sm text-gray-400 underline"
+          >
+            Reset
+          </button>
         </div>
 
         {tab === "Overview" && (
           <>
-            <div className="grid grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <Kpi label="Revenue" days={days} value={`$${k.total_revenue.toLocaleString()}`} change={change.revenue} />
               <Kpi label="Units" days={days} value={k.units_sold.toLocaleString()} change={change.units} />
               <Kpi label="Avg Price" days={days} value={`$${k.avg_price}`} change={change.avgPrice} />
@@ -120,9 +139,7 @@ export default function Dashboard({ rows }: { rows: Row[] }) {
         )}
 
         {tab === "Revenue" && (
-          <>
-            <Card title="Monthly Revenue + 3-month Rolling Avg"><TrendChart {...data.monthly_revenue} /></Card>
-          </>
+          <Card title="Monthly Revenue + 3-month Rolling Avg"><TrendChart {...data.monthly_revenue} /></Card>
         )}
 
         {tab === "Products" && (
